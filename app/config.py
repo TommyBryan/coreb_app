@@ -12,9 +12,9 @@ def _resource_root() -> Path:
 
 
 def _default_user_dir() -> Path:
-    """Writable folder for the SQLite file and uploaded media."""
+    """Writable folder for songs.csv, the JSON files and uploaded media."""
     if os.environ.get("VERCEL"):
-        return Path("/tmp/coreb")
+        return Path("/tmp/coreb")  # Vercel's only writable disk; wiped between cold starts
     if getattr(sys, "frozen", False):
         base = os.environ.get("APPDATA") or str(Path.home())
         return Path(base) / "COREB"
@@ -26,16 +26,8 @@ class Settings:
         root = _resource_root()
         self.static_dir = root / "static"
         self.data_dir = root / "data"
-        self.user_dir = Path(os.environ.get("COREB_USER_DIR") or _default_user_dir())
-        self.db_path = self.user_dir / "coreb.sqlite3"
+        self.user_dir = Path(os.environ.get("COREB_DATA_DIR") or _default_user_dir())
         self.media_dir = self.user_dir / "media"
-        self.supabase_url = os.environ.get("SUPABASE_URL", "").strip()
-        self.supabase_key = os.environ.get("SUPABASE_KEY", "").strip()
-        self.supabase_bucket = os.environ.get("SUPABASE_BUCKET", "media").strip()
-
-    @property
-    def use_supabase(self) -> bool:
-        return bool(self.supabase_url and self.supabase_key)
 
 
 @lru_cache

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from .. import bible
-from ..storage import Store, get_store
+from ..storage import FileStore, get_store
 
 router = APIRouter(prefix="/api/bible", tags=["bible"])
 
@@ -32,7 +32,7 @@ def passage(
     start: int | None = None,
     end: int | None = None,
     record: bool = False,
-    store: Store = Depends(get_store),
+    store: FileStore = Depends(get_store),
 ):
     """Look up by free-text `ref` ("John 3:16-18") or by `book`/`chapter`/`start`/`end`."""
     _check(translation)
@@ -56,16 +56,16 @@ class HistoryIn(BaseModel):
 
 
 @router.get("/history")
-def history(limit: int = Query(50, ge=1, le=500), store: Store = Depends(get_store)):
+def history(limit: int = Query(50, ge=1, le=500), store: FileStore = Depends(get_store)):
     return store.list_history(limit)
 
 
 @router.post("/history")
-def add_history(item: HistoryIn, store: Store = Depends(get_store)):
+def add_history(item: HistoryIn, store: FileStore = Depends(get_store)):
     return store.add_history(_check(item.translation), item.reference.strip())
 
 
 @router.delete("/history")
-def clear_history(store: Store = Depends(get_store)):
+def clear_history(store: FileStore = Depends(get_store)):
     store.clear_history()
     return {"ok": True}

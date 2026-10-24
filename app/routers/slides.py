@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from ..storage import NotFound, Store, get_store
+from ..storage import FileStore, NotFound, get_store
 
 router = APIRouter(prefix="/api/slides", tags=["slides"])
 
@@ -12,17 +12,17 @@ class SlideIn(BaseModel):
 
 
 @router.get("")
-def list_slides(store: Store = Depends(get_store)):
+def list_slides(store: FileStore = Depends(get_store)):
     return store.list_slides()
 
 
 @router.post("", status_code=201)
-def create_slide(slide: SlideIn, store: Store = Depends(get_store)):
+def create_slide(slide: SlideIn, store: FileStore = Depends(get_store)):
     return store.create_slide(slide.title.strip(), slide.body)
 
 
 @router.put("/{slide_id}")
-def update_slide(slide_id: int, slide: SlideIn, store: Store = Depends(get_store)):
+def update_slide(slide_id: int, slide: SlideIn, store: FileStore = Depends(get_store)):
     try:
         return store.update_slide(slide_id, slide.title.strip(), slide.body)
     except NotFound:
@@ -30,7 +30,7 @@ def update_slide(slide_id: int, slide: SlideIn, store: Store = Depends(get_store
 
 
 @router.delete("/{slide_id}")
-def delete_slide(slide_id: int, store: Store = Depends(get_store)):
+def delete_slide(slide_id: int, store: FileStore = Depends(get_store)):
     try:
         store.delete_slide(slide_id)
     except NotFound:

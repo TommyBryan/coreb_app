@@ -1,11 +1,10 @@
-"""Song helpers: CSV seed/import/export and splitting lyrics into projectable sections."""
+"""Song helpers: CSV import/export and splitting lyrics into projectable sections."""
 
 import csv
 import io
 import re
-from pathlib import Path
 
-from .storage.base import Store
+from .storage import FileStore
 
 CSV_FIELDS = ["title", "author", "lyrics"]
 
@@ -32,7 +31,7 @@ def read_csv(text: str) -> list[dict]:
     return songs
 
 
-def import_csv(store: Store, text: str) -> int:
+def import_csv(store: FileStore, text: str) -> int:
     songs = read_csv(text)
     for s in songs:
         store.create_song(s["title"], s["author"], s["lyrics"])
@@ -46,9 +45,3 @@ def export_csv(songs: list[dict]) -> str:
     for s in songs:
         writer.writerow(s)
     return out.getvalue()
-
-
-def seed_if_empty(store: Store, seed_file: Path) -> int:
-    if store.count_songs() > 0 or not seed_file.exists():
-        return 0
-    return import_csv(store, seed_file.read_text(encoding="utf-8"))
