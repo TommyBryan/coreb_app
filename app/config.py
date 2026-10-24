@@ -13,8 +13,6 @@ def _resource_root() -> Path:
 
 def _default_user_dir() -> Path:
     """Writable folder for songs.csv, the JSON files and uploaded media."""
-    if os.environ.get("VERCEL"):
-        return Path("/tmp/coreb")  # Vercel's only writable disk; wiped between cold starts
     if getattr(sys, "frozen", False):
         base = os.environ.get("APPDATA") or str(Path.home())
         return Path(base) / "COREB"
